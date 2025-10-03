@@ -19,3 +19,6 @@ class TestHTMLNode(unittest.TestCase):
     def test_repr(self):
         node = HTMLNode("div", "This is a div", None, None)
         self.assertEqual(repr(node), "HTMLNode(div, This is a div, None, None)")
+        
+if __name__ == "__main__":
+    unittest.main()

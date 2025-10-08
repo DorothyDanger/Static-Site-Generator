@@ -1,0 +1,34 @@
+### Part of the learning process, just adding for documentation purposes
+### This was useful in its own right, in terms of working through the logic and figuring out how this works but ultimately
+### it was worthless because a delimiter can be multiple characters long, as well as the fact it is likely very slow.
+            new_node_text_start = 0
+            new_node_text_end = 0
+            x = 0
+            while x < len(node.text):
+                delimiter_found = False
+                char = node.text[x]
+                if char == delimiter:
+                    delimiter_found = True
+                    new_node_text_end = x
+                    if new_node_text_end - new_node_text_start > 0:
+                        new_nodes.append(TextNode(node.text[new_node_text_start:new_node_text_end], TextType.PLAIN, None))
+                    new_node_text_start = x + 1
+                while (delimiter_found):
+                    x = x + 1
+                    if x > len(node.text) - 1:
+                        raise Exception("Invalid markdown syntax.")
+                    char = node.text[x]
+                    if char == delimiter:
+                        delimiter_found = False # Found closing delimiter
+                        new_node_text_end = x
+                        if new_node_text_end - new_node_text_start >= 0:
+                            new_nodes.append(TextNode(node.text[new_node_text_start:new_node_text_end], text_type, None))
+                        new_node_text_start = x + 1         
+                if x == len(node.text) - 1:
+                    new_node_text_end = x + 1
+                    if new_node_text_end - new_node_text_start > 0:
+                        new_nodes.append(TextNode(node.text[new_node_text_start:new_node_text_end], TextType.PLAIN, None))
+                x = x + 1
+    return new_nodes
+###########################################################################################################################################
+

@@ -52,8 +52,23 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     new_nodes.append(TextNode(parts[i], text_type, None))
     return new_nodes
 
+def extract_markdown_images(text):
+    import re
+    pattern = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
+    matches = re.findall(pattern, text)
+    images = []
+    for alt, url in matches:
+        images.append((alt, url))
+    return images
 
-            
+def extract_markdown_links(text):
+    import re
+    pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
+    matches = re.findall(pattern, text)
+    links = []
+    for anchor, url in matches:
+        links.append((anchor, url))
+    return links
                         
 
                     

@@ -88,7 +88,6 @@ def split_nodes_image(old_nodes):
                 parts = full_text.split(image, 1)
                 if len(parts) != 2:
                     raise ValueError("Invalid markdown. Image not closed.")
-                    continue
                 if parts[0]:
                     new_nodes.append(TextNode(parts[0], TextType.PLAIN, None))
                 new_nodes.append(TextNode(alt, TextType.IMAGE, url))
@@ -112,10 +111,9 @@ def split_nodes_link(old_nodes):
             full_text = node.text
             for anchor, url in links:
                 link = f"[{anchor}]({url})"
-                parts = full_text.split(link, 1)#
+                parts = full_text.split(link, 1)
                 if len(parts) != 2:
                     raise ValueError("Invalid markdown. Link not closed.")
-                    continue
                 if parts[0]:
                     new_nodes.append(TextNode(parts[0], TextType.PLAIN, None))
                 new_nodes.append(TextNode(anchor, TextType.LINK, url))
@@ -123,3 +121,14 @@ def split_nodes_link(old_nodes):
             if full_text:
                 new_nodes.append(TextNode(full_text, TextType.PLAIN, None))
     return new_nodes
+
+def text_to_textnodes(text):
+    from textnode import TextNode, TextType
+    nodes = []
+    nodes.append(TextNode(text, TextType.PLAIN, None))
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    nodes = split_nodes_delimiter(nodes, '**', TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, '_', TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, '`', TextType.CODE)
+    return nodes

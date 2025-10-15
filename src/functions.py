@@ -70,5 +70,56 @@ def extract_markdown_links(text):
         links.append((anchor, url))
     return links
                         
+def split_nodes_image(old_nodes):
+    from textnode import TextNode, TextType
+    new_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.PLAIN:
+            new_nodes.append(node)
+            continue
+        images = extract_markdown_images(node.text)
+        if not images:
+            new_nodes.append(node)
+            continue
+        else:
+            full_text = node.text
+            for alt, url in images:
+                image = f"![{alt}]({url})"
+                parts = full_text.split(image, 1)
+                if len(parts) != 2:
+                    raise ValueError("Invalid markdown. Image not closed.")
+                    continue
+                if parts[0]:
+                    new_nodes.append(TextNode(parts[0], TextType.PLAIN, None))
+                new_nodes.append(TextNode(alt, TextType.IMAGE, url))
+                full_text = parts[1]
+            if full_text:
+                new_nodes.append(TextNode(full_text, TextType.PLAIN, None))
+    return new_nodes
 
-                    
+def split_nodes_link(old_nodes):
+    from textnode import TextNode, TextType
+    new_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.PLAIN:
+            new_nodes.append(node)
+            continue
+        links = extract_markdown_links(node.text)
+        if not links:
+            new_nodes.append(node)
+            continue
+        else:
+            full_text = node.text
+            for anchor, url in links:
+                link = f"[{anchor}]({url})"
+                parts = full_text.split(link, 1)#
+                if len(parts) != 2:
+                    raise ValueError("Invalid markdown. Link not closed.")
+                    continue
+                if parts[0]:
+                    new_nodes.append(TextNode(parts[0], TextType.PLAIN, None))
+                new_nodes.append(TextNode(anchor, TextType.LINK, url))
+                full_text = parts[1]
+            if full_text:
+                new_nodes.append(TextNode(full_text, TextType.PLAIN, None))
+    return new_nodes

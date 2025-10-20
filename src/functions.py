@@ -150,3 +150,38 @@ def markdown_to_blocks(markdown):
         if stripped:
             blocks.append(stripped)
     return blocks
+
+from enum import Enum
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
+
+def block_to_block_type(block):
+    import re
+    lines = block.split("\n")
+
+    if re.match(r"#{1,6} ", lines[0]):
+        return BlockType.HEADING
+    elif re.match(r"```.*?", lines[0]):
+        if re.match(r".*?```", lines[-1]):
+            return BlockType.CODE
+        else:
+            return BlockType.PARAGRAPH
+    elif re.match(r"> ", lines[0]):
+        return BlockType.QUOTE
+    elif re.match(r"- .*?", lines[0]):
+        for line in lines:
+            if not re.match(r"- .*?", line):
+                return BlockType.PARAGRAPH
+        return BlockType.UNORDERED_LIST
+    elif re.match(r"\d. .*?", lines[0]):
+        for line in lines:
+            if not re.match(r"\d. .*?", line):
+                return BlockType.PARAGRAPH
+        return BlockType.ORDERED_LIST
+    return BlockType.PARAGRAPH
+    

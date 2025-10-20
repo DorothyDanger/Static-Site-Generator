@@ -132,3 +132,21 @@ def text_to_textnodes(text):
     nodes = split_nodes_delimiter(nodes, '_', TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, '`', TextType.CODE)
     return nodes
+
+def markdown_to_blocks(markdown):
+    lines = markdown.split('\n\n')
+    blocks = []
+    for line in lines:
+        multiple_lines = line.strip().split('\n')
+        stripped = ""
+        #if len(multiple_lines) > 1:
+        for i in range(len(multiple_lines)):
+            if i == len(multiple_lines) - 1:
+                stripped += multiple_lines[i].strip()
+            else:
+                stripped += multiple_lines[i].strip() + '\n'
+        #else:
+            #stripped = line.strip()
+        if stripped:
+            blocks.append(stripped)
+    return blocks

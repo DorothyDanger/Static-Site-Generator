@@ -185,3 +185,163 @@ def block_to_block_type(block):
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
     
+
+def markdown_to_html_node(markdown):
+    from htmlnode import HTMLNode
+    from leafnode import LeafNode
+    from parentnode import ParentNode
+    # So. In reading through the pseudocode I need to create multiple helper functions.
+    # These will be used to convert each block to its respective HTMLNode representation.
+    # Within the helper functions I will need to make use of other functions I've written.
+    # For instance if something is a "PARAGRAPH", it can still contain bold, italic, links, images, etc.
+    # So I will need to use text_to_textnodes within those helper functions.
+    # But it needs to be altered to wrap in <p>, <h1>, <ol>, <ul>, <li>, etc.
+    # I imagine I will have an additional helper function for these other helper functions.
+    # A helper helper function. Which will cdo this wrapping.
+    # e.g. the BlockType.PARAGRAPH function will convert each item in the block to whichever respective textnode it is.
+    # Then i will loop through them and have a new "helper helper function" that will convert a "BOLD textnode" to a "<b>HTMLNode</b>".
+    # for ITALIC, LINK, IMAGE, CODE, PLAIN, etc.
+    # Now that I've worked through the logic I will implement it tomorrow and reference back here as needed.
+    blocks = markdown_to_blocks(markdown)
+    block_nodes = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        block_node = block_and_type_to_html_node(block, block_type)
+        block_nodes.append(block_node)
+    # This stuff does not work. I think I'm overthinking the implementation.
+    # My helper functions should only return leaf nodes. None of them should have children.
+    # I simply need to do string formatting and wrap them in tags.
+    # ABOVE IS THE MOST IMPORTANT
+    # In my tiredness, I do believe I simply have to create loops and make a leaf node list for each
+    # Then return a parent node with the list as the child. TRUE!!!
+    div_parent = ParentNode("div", block_nodes, None)
+    return div_parent
+
+def block_and_type_to_html_node(block, block_type):
+    match (block_type):
+            case BlockType.PARAGRAPH:
+                return paragraph_block_to_html_node(block)
+            case BlockType.HEADING:
+                return heading_block_to_html_node(block)
+            case BlockType.CODE:
+                return code_block_to_html_node(block)
+            case BlockType.QUOTE:
+                return quote_block_to_html_node(block)
+            case BlockType.UNORDERED_LIST:
+                return unordered_list_block_to_html_node(block)
+            case BlockType.ORDERED_LIST:
+                return ordered_list_block_to_html_node(block)
+            case _:
+                raise ValueError("Unrecognized block type")
+
+def paragraph_block_to_html_node(block):
+    from htmlnode import HTMLNode
+    from leafnode import LeafNode
+    from parentnode import ParentNode
+    #block = block.strip("\n")
+    #text_nodes = text_to_textnodes(block)
+    #children = []
+    #for text_node in text_nodes:
+        #html_node = text_node_to_html_node(text_node)
+        #children.append(html_node)
+    text_nodes = text_to_textnodes(block)
+    children = []
+    for tn in text_nodes:
+        tn.text = tn.text.replace('\n', ' ')
+        html_node = text_node_to_html_node(tn)
+        children.append(html_node)
+    paragraph_node = ParentNode("p", children, None)
+    return paragraph_node
+
+def heading_block_to_html_node(block):
+    from htmlnode import HTMLNode
+    from leafnode import LeafNode
+    import re
+
+    match = re.match(r"(#{1,6}) (.*)", block)
+    total_hashes = len(match.group(1))
+    heading_text = match.group(2)
+
+    match total_hashes:
+        case 1:
+            tag = "h1"
+        case 2:
+            tag = "h2"
+        case 3:
+            tag = "h3"
+        case 4:
+            tag = "h4"
+        case 5:
+            tag = "h5"
+        case 6:
+            tag = "h6"
+    text_node = text_to_textnodes(heading_text)
+    heading_node = LeafNode(tag, text_node, None)
+    return heading_node
+
+def code_block_to_html_node(block):
+    from leafnode import LeafNode
+    from parentnode import ParentNode
+    # This worked
+    #code_text = ""
+    #block = block.strip("```").strip()
+    #for line in block.split("\n"):
+        #code_text += line + "\n"
+    #code_text.strip()
+
+    #code_text = block.strip("```").strip() This single line worked before but didn't preserve the final newline
+    #code_text = code_text.rstrip("\n")
+    #print(f"code text: {code_text}")
+
+    code_text = block.strip("```").strip() + "\n" # After tinkering around with the above I realised I could just do this.
+    code_node = LeafNode("code", code_text)
+    pre_node = ParentNode("pre", [code_node], None)
+    return pre_node
+
+def quote_block_to_html_node(block):
+    from htmlnode import HTMLNode
+    from leafnode import LeafNode
+    quote_text = block.lstrip("> ").strip()
+    #text_nodes = text_to_textnodes(quote_text)
+    #hildren = []
+    #for text_node in text_nodes:
+        #html_node = text_node_to_html_node(text_node)
+        #children.append(html_node)
+    quote_node = LeafNode("blockquote", quote_text)
+    return quote_node
+
+def unordered_list_block_to_html_node(block):
+    from htmlnode import HTMLNode
+    from leafnode import LeafNode
+    from parentnode import ParentNode
+    lines = block.strip().split("\n")
+    list_nodes = []
+    for line in lines:
+        text = line.lstrip("- ").strip()
+        text_node = text_to_textnodes(text)
+        children = []
+        for tn in text_node:
+            html_node = text_node_to_html_node(tn)
+            children.append(html_node)
+        li_node = LeafNode("li", children, None)
+        list_nodes.append(li_node)
+    ul_node = ParentNode("ul", list_nodes, None)
+    return ul_node
+
+def ordered_list_block_to_html_node(block):
+    from htmlnode import HTMLNode
+    from leafnode import LeafNode
+    from parentnode import ParentNode
+    lines = block.strip().split("\n")
+    list_nodes = []
+    for line in lines:
+        text = line.lstrip("0123456789. ").strip()
+        text_node = text_to_textnodes(text)
+        children = []
+        for tn in text_node:
+            html_node = text_node_to_html_node(tn)
+            children.append(html_node)
+        li_node = LeafNode("li", children, None)
+        list_nodes.append(li_node)
+    ol_node = ParentNode("ol", list_nodes, None)
+    return ol_node

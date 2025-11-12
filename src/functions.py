@@ -350,3 +350,37 @@ def ordered_list_block_to_html_node(block):
         list_nodes.append(li_node)
     ol_node = ParentNode("ol", list_nodes, None)
     return ol_node
+
+# Recursive function to copy static files to public directory
+def copy_static_to_public(source = "static", destination = "public"):
+    #Write a recursive function that copies all the contents from a source directory to a destination directory (in our case, static to public)
+    #It should first delete all the contents of the destination directory (public) to ensure that the copy is clean.
+    #It should copy all files and subdirectories, nested files, etc.
+    #I recommend logging the path of each file you copy, so you can see what's happening as you run and debug your code.
+    import os
+    import shutil
+
+    source_directory = source
+    destination_directory = destination
+    # Delete all contents of destination
+    if os.path.exists(destination_directory):
+        shutil.rmtree(destination_directory)
+    os.mkdir(destination_directory)
+
+    # Copy contents from source to destination
+    for item in os.listdir(source_directory):
+        source_path = os.path.join(source_directory, item)
+        destination_path = os.path.join(destination_directory, item)
+        if os.path.isfile(source_path):
+            shutil.copy(source_path, destination_path)
+            print(f"Copied file: {source_path} to {destination_path}")
+        else:
+            copy_static_to_public(source_path, destination_path)
+
+
+       
+
+
+    
+
+    

@@ -256,6 +256,7 @@ def paragraph_block_to_html_node(block):
 def heading_block_to_html_node(block):
     from htmlnode import HTMLNode
     from leafnode import LeafNode
+    from parentnode import ParentNode
     import re
 
     match = re.match(r"(#{1,6}) (.*)", block)
@@ -276,7 +277,12 @@ def heading_block_to_html_node(block):
         case 6:
             tag = "h6"
     text_node = text_to_textnodes(heading_text)
-    heading_node = LeafNode(tag, text_node, None)
+    # Get full text including inline formatting
+    full_text = ""
+    for tn in text_node:
+        full_text += text_node_to_html_node(tn).to_html()
+
+    heading_node = LeafNode(tag, full_text, None)
     return heading_node
 
 def code_block_to_html_node(block):
@@ -319,11 +325,11 @@ def unordered_list_block_to_html_node(block):
     for line in lines:
         text = line.lstrip("- ").strip()
         text_node = text_to_textnodes(text)
-        children = []
+        list_text = ""
+        # Handles inline formatting for the text
         for tn in text_node:
-            html_node = text_node_to_html_node(tn)
-            children.append(html_node)
-        li_node = LeafNode("li", children, None)
+            list_text += text_node_to_html_node(tn).to_html()
+        li_node = LeafNode("li", list_text, None)
         list_nodes.append(li_node)
     ul_node = ParentNode("ul", list_nodes, None)
     return ul_node
@@ -337,11 +343,10 @@ def ordered_list_block_to_html_node(block):
     for line in lines:
         text = line.lstrip("0123456789. ").strip()
         text_node = text_to_textnodes(text)
-        children = []
+        list_text = ""
         for tn in text_node:
-            html_node = text_node_to_html_node(tn)
-            children.append(html_node)
-        li_node = LeafNode("li", children, None)
+            list_text += text_node_to_html_node(tn).to_html()
+        li_node = LeafNode("li", list_text, None)
         list_nodes.append(li_node)
     ol_node = ParentNode("ol", list_nodes, None)
     return ol_node

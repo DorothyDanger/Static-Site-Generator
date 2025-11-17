@@ -354,7 +354,8 @@ def ordered_list_block_to_html_node(block):
     return ol_node
 
 # Recursive function to copy static files to public directory
-def copy_static_to_public(source = "static", destination = "public"):
+# Updated to "docs" from "public" to work with github pages
+def copy_static_to_public(source = "static", destination = "docs"):
     #Write a recursive function that copies all the contents from a source directory to a destination directory (in our case, static to public)
     #It should first delete all the contents of the destination directory (public) to ensure that the copy is clean.
     #It should copy all files and subdirectories, nested files, etc.
@@ -389,7 +390,7 @@ def extract_title(markdown):
     raise ValueError("No H1 header found; invalid markdown format.")
 
 # Comments are given pseudocode instructions for debugging and learning purposes
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     import os
 
     # Message
@@ -419,6 +420,7 @@ def generate_page(from_path, template_path, dest_path):
     print(f"Title: {title}")
     
     final_content = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html_string)
+    final_content = final_content.replace('href="/', f'href="{base_path}').replace('src="/', f'src="{base_path}')
     # Debugging prints
     #print(f"Final content length: {len(final_content)}")
     #print(f"Final content: {final_content[:100]}")  # First 100 chars
@@ -428,7 +430,7 @@ def generate_page(from_path, template_path, dest_path):
     new_file.write(final_content)
     new_file.close()
 
-def generate_pages_recursive(dest_dir_path, dir_path_content = "content", template_path = "template.html"):
+def generate_pages_recursive(dest_dir_path, dir_path_content = "content", template_path = "template.html", base_path = "/"):
     import os
     # Loop through all items in dir_path_content
     for item in os.listdir(dir_path_content):
@@ -439,13 +441,13 @@ def generate_pages_recursive(dest_dir_path, dir_path_content = "content", templa
         # If item is an MD file, generate a page
         if os.path.isfile(content) and content.endswith(".md"):
             destination_html = destination[:-3] + ".html" # change .md to .html
-            generate_page(content, template_path, destination_html)
+            generate_page(content, template_path, destination_html, base_path)
         # If item is a directory, create the directory if it doesn't exist
         # Then recursive to generate pages within that directory
         elif os.path.isdir(content):
             if os.path.exists(destination) == False:
                 os.mkdir(destination)
-            generate_pages_recursive(destination, content, template_path)
+            generate_pages_recursive(destination, content, template_path, base_path)
 
 
     

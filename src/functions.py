@@ -377,8 +377,14 @@ def copy_static_to_public(source = "static", destination = "public"):
         else:
             copy_static_to_public(source_path, destination_path)
 
-
-       
+def extract_title(markdown):
+    import re
+    lines = markdown.split("\n")#
+    for line in lines:
+        match = re.match(r"# (.*)", line)
+        if match:
+            return match.group(1).strip()
+    raise ValueError("No H1 header found; invalid markdown format.")
 
 
     

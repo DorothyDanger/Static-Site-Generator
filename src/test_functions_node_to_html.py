@@ -32,14 +32,14 @@ class TestFunctions(unittest.TestCase):
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "a")
         self.assertEqual(html_node.value, "This is a link text node")
-        self.assertEqual(html_node.props, '"href"= http://example.com')
+        self.assertEqual(html_node.props, {"href": "http://example.com"})
     
     def test_image(self):
         node = TextNode("This is an image text node", TextType.IMAGE, "http://example.com/image.png")
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "img")
         self.assertEqual(html_node.value, "")
-        self.assertEqual(html_node.props, '"src"= http://example.com/image.png, alt="This is an image text node"')
+        self.assertEqual(html_node.props, {"src": "http://example.com/image.png", "alt": "This is an image text node"})
     
     def test_link_no_url(self):
         node = TextNode("This is a link text node", TextType.LINK)

@@ -70,6 +70,14 @@ class TestFunctionsMarkdownToHtmlNode(unittest.TestCase):
             "<div><h1>Heading</h1><p>This is a paragraph with <b>bold</b> text.</p><ul><li>List item 1</li><li>List item 2 with <i>italic</i></li></ul><pre><code>Code block here\n</code></pre></div>",
         )
 
+    def test_unordered_list_with_links_and_images(self):
+        md = " - Item 1 with [a link](http://example.com)\n- Item 2 with an image ![alt text](image.jpg)\n"
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><ul><li>Item 1 with <a href="http://example.com">a link</a></li><li>Item 2 with an image <img src="image.jpg" alt="alt text"></img></li></ul></div>',
+        )
     
 if __name__ == "__main__":
     unittest.main()

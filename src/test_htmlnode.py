@@ -16,6 +16,15 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode("div", "This is a div", None, None)
         self.assertNotEqual(node, "This is not a div")
 
+    def test_props_to_html(self):
+        node = HTMLNode("div", "This is a div", None, {"class": "container", "id": "main"})
+        self.assertEqual(node.props_to_html(), ' class="container" id="main"')
+
+    def test_props_is_string(self):
+        node = HTMLNode("div", "This is a div", None, "not a dict")
+        with self.assertRaises(TypeError):
+            node.props_to_html()
+
     def test_repr(self):
         node = HTMLNode("div", "This is a div", None, None)
         self.assertEqual(repr(node), "HTMLNode(div, This is a div, None, None)")

@@ -13,10 +13,10 @@ class HTMLNode:
     def props_to_html(self):
         if not self.props:
             return ""
-        return_string = []
-        for key, value in self.props.items():
-            return_string.append(f' {key}="{value}"')
-        return "".join(return_string)
+        return_string = ""
+        for prop in self.props:
+            return_string += f' {prop}="{self.props[prop]}"'
+        return return_string
     
     def __eq__(self, value):
         if not isinstance(value, HTMLNode):

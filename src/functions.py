@@ -20,12 +20,12 @@ def text_node_to_html_node(text_node):
             # Wrap in <a> tags with href attribute
             if text_node.url is None:
                 raise ValueError("Must have URL for link")
-            return LeafNode("a", text_node.text, f'"href"= {text_node.url}')
+            return LeafNode("a", text_node.text, {"href": text_node.url})
         case TextType.IMAGE:
             # Wrap in <img> tags with src attribute, no inner text
             if text_node.url is None:
                 raise ValueError("Must have URL for image")
-            return LeafNode("img", "", f'"src"= {text_node.url}, alt="{text_node.text}"')
+            return LeafNode("img", "", {"src": text_node.url, "alt":text_node.text})
         
         case _:
             # Default to plain text if type is unrecognized
@@ -326,10 +326,12 @@ def unordered_list_block_to_html_node(block):
         text = line.lstrip("- ").strip()
         text_node = text_to_textnodes(text)
         list_text = ""
+        list_props = None
         # Handles inline formatting for the text
         for tn in text_node:
             list_text += text_node_to_html_node(tn).to_html()
-        li_node = LeafNode("li", list_text, None)
+
+        li_node = LeafNode("li", list_text, list_props)
         list_nodes.append(li_node)
     ul_node = ParentNode("ul", list_nodes, None)
     return ul_node
@@ -385,6 +387,46 @@ def extract_title(markdown):
         if match:
             return match.group(1).strip()
     raise ValueError("No H1 header found; invalid markdown format.")
+
+# Comments are given pseudocode instructions for debugging and learning purposes
+def generate_page(from_path, template_path, dest_path):
+    import os
+
+    # Message
+    print(f"Generating page from {from_path} to {dest_path} using template {template_path}")
+
+    # Read markdown content and store in a variable
+    from_path_file = open(from_path, "r", encoding="utf-8")
+    markdown_content = from_path_file.read()
+    from_path_file.close()
+    # Debugging prints
+    #print(f"Markdown content length: {len(markdown_content)}")
+    #print(f"Markdown content: {markdown_content[:100]}")  # First 100 chars
+
+    # Read template file and store content in a variable
+    template_file = open(template_path, "r", encoding="utf-8")
+    template_content = template_file.read()
+    template_file.close()
+    # Use Markdown to HTML Node function and .to_html() method to convert markdown content to HTML string
+    html_node = markdown_to_html_node(markdown_content)
+    html_string = html_node.to_html()
+    # Debugging prints
+    #print(f"HTML string length: {len(html_string)}")
+    #print(f"HTML string: {html_string[:100]}")  # First 100 chars
+
+    # Replace {{ Title }} and {{ Content }} placeholders in the template with the HTML and title generated
+    title = extract_title(markdown_content)
+    print(f"Title: {title}")
+    
+    final_content = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html_string)
+    # Debugging prints
+    #print(f"Final content length: {len(final_content)}")
+    #print(f"Final content: {final_content[:100]}")  # First 100 chars
+
+    # Write the new full HTML page to a file at dest_path
+    new_file = open(dest_path, "w", encoding="utf-8")
+    new_file.write(final_content)
+    new_file.close()
 
 
     

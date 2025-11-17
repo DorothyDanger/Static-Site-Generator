@@ -428,6 +428,25 @@ def generate_page(from_path, template_path, dest_path):
     new_file.write(final_content)
     new_file.close()
 
+def generate_pages_recursive(dest_dir_path, dir_path_content = "content", template_path = "template.html"):
+    import os
+    # Loop through all items in dir_path_content
+    for item in os.listdir(dir_path_content):
+        # content and destination paths
+        content = os.path.join(dir_path_content, item)
+        destination = os.path.join(dest_dir_path, item)
+        
+        # If item is an MD file, generate a page
+        if os.path.isfile(content) and content.endswith(".md"):
+            destination_html = destination[:-3] + ".html" # change .md to .html
+            generate_page(content, template_path, destination_html)
+        # If item is a directory, create the directory if it doesn't exist
+        # Then recursive to generate pages within that directory
+        elif os.path.isdir(content):
+            if os.path.exists(destination) == False:
+                os.mkdir(destination)
+            generate_pages_recursive(destination, content, template_path)
+
 
     
 

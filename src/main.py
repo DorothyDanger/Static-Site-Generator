@@ -3,7 +3,7 @@ from functions import *
 
 def main():
     copy_static_to_public()
-    generate_page(from_path = "content/index.md", template_path= "template.html", dest_path="public/index.html")
+    generate_pages_recursive(dest_dir_path = "public", dir_path_content = "content", template_path = "template.html")
 
 
 if __name__ == "__main__":
